@@ -1,0 +1,14 @@
+{
+  "karousel": {
+    "version": "0.17",
+    "commit": "d14c8fbd57a8f65a09c34c34605f8a6858ed05fb",
+    "url": "https://codeload.github.com/peterfajdiga/karousel/tar.gz/d14c8fbd57a8f65a09c34c34605f8a6858ed05fb",
+    "sha256": "14e554e1b2a3d095d70bed2021a68361002d580efc0a942db7595a738ffba28a"
+  },
+  "kwin4_effect_geometry_change": {
+    "version": "1.5",
+    "commit": "a7a490c43c877e5e58d45d6c0561a79140c8eca5",
+    "url": "https://codeload.github.com/peterfajdiga/kwin4_effect_geometry_change/tar.gz/a7a490c43c877e5e58d45d6c0561a79140c8eca5",
+    "sha256": "0019904227b73058f2f90abdd4932f9fa7a26d91cdb671987afcfe670882e01c"
+  }
+}
