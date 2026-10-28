@@ -1,0 +1,348 @@
+--- karousel-0.17/contents/code/main.js
++++ karousel-primary/contents/code/main.js
+@@ -1,4 +1,23 @@
+ "use strict";
++// Local primary-output adaptation for Karousel 0.17.
++// No native multiscreen support is implied. Fully visible columns only.
++function karouselPrimaryOutput() {
++    const preferred = KWin.readConfig("primaryOutputName", "eDP-1");
++    return Workspace.screens.find(screen => screen.name === preferred) ?? Workspace.screens[0] ?? Workspace.activeScreen;
++}
++function karouselOnPrimary(client) {
++    return client.output === karouselPrimaryOutput();
++}
++function karouselPlacement(x, y, width, height, area) {
++    if (x >= area.x - 1 && x + width <= area.x + area.width + 1) {
++        return {x: x, y: y};
++    }
++    // Park overflow columns to the LEFT of every connected output, never on
++    // another monitor. The grid keeps its original logical coordinates.
++    const leftmost = Math.min(...Workspace.screens.map(screen => screen.geometry.x));
++    return {x: leftmost - width - 64, y: y};
++}
++
+ function initWorkspaceSignalHandlers(world, focusPasser) {
+     const manager = new SignalManager();
+     manager.connect(Workspace.windowAdded, (kwinClient) => {
+@@ -920,34 +939,34 @@
+         {
+             name: "window-toggle-floating",
+             description: "Toggle floating",
+-            defaultKeySequence: "Meta+Space",
++            defaultKeySequence: "",
+             action: () => world.do(actions.windowToggleFloating),
+         },
+         {
+             name: "focus-left",
+             description: "Move focus left",
+-            defaultKeySequence: "Meta+A",
++            defaultKeySequence: "",
+             action: () => world.doIfTiledFocused(actions.focusLeft),
+         },
+         {
+             name: "focus-right",
+             description: "Move focus right",
+             comment: "Clashes with default KDE shortcuts, may require manual remapping",
+-            defaultKeySequence: "Meta+D",
++            defaultKeySequence: "",
+             action: () => world.doIfTiledFocused(actions.focusRight),
+         },
+         {
+             name: "focus-up",
+             description: "Move focus up",
+             comment: "Clashes with default KDE shortcuts, may require manual remapping",
+-            defaultKeySequence: "Meta+W",
++            defaultKeySequence: "",
+             action: () => world.doIfTiledFocused(actions.focusUp),
+         },
+         {
+             name: "focus-down",
+             description: "Move focus down",
+             comment: "Clashes with default KDE shortcuts, may require manual remapping",
+-            defaultKeySequence: "Meta+S",
++            defaultKeySequence: "",
+             action: () => world.doIfTiledFocused(actions.focusDown),
+         },
+         {
+@@ -963,39 +982,39 @@
+         {
+             name: "focus-start",
+             description: "Move focus to start",
+-            defaultKeySequence: "Meta+Home",
++            defaultKeySequence: "",
+             action: () => world.do(actions.focusStart),
+         },
+         {
+             name: "focus-end",
+             description: "Move focus to end",
+-            defaultKeySequence: "Meta+End",
++            defaultKeySequence: "",
+             action: () => world.do(actions.focusEnd),
+         },
+         {
+             name: "window-move-left",
+             description: "Move window left",
+             comment: "Moves window out of and into columns",
+-            defaultKeySequence: "Meta+Shift+A",
++            defaultKeySequence: "",
+             action: () => world.doIfTiledFocused(actions.windowMoveLeft),
+         },
+         {
+             name: "window-move-right",
+             description: "Move window right",
+             comment: "Moves window out of and into columns",
+-            defaultKeySequence: "Meta+Shift+D",
++            defaultKeySequence: "",
+             action: () => world.doIfTiledFocused(actions.windowMoveRight),
+         },
+         {
+             name: "window-move-up",
+             description: "Move window up",
+-            defaultKeySequence: "Meta+Shift+W",
++            defaultKeySequence: "",
+             action: () => world.doIfTiledFocused(actions.windowMoveUp),
+         },
+         {
+             name: "window-move-down",
+             description: "Move window down",
+-            defaultKeySequence: "Meta+Shift+S",
++            defaultKeySequence: "",
+             action: () => world.doIfTiledFocused(actions.windowMoveDown),
+         },
+         {
+@@ -1011,13 +1030,13 @@
+         {
+             name: "window-move-start",
+             description: "Move window to start",
+-            defaultKeySequence: "Meta+Shift+Home",
++            defaultKeySequence: "",
+             action: () => world.doIfTiledFocused(actions.windowMoveStart),
+         },
+         {
+             name: "window-move-end",
+             description: "Move window to end",
+-            defaultKeySequence: "Meta+Shift+End",
++            defaultKeySequence: "",
+             action: () => world.doIfTiledFocused(actions.windowMoveEnd),
+         },
+         {
+@@ -1034,31 +1053,31 @@
+             name: "column-toggle-stacked",
+             description: "Toggle stacked layout for focused column",
+             comment: "Only the active window visible",
+-            defaultKeySequence: "Meta+X",
++            defaultKeySequence: "",
+             action: () => world.doIfTiledFocused(actions.columnToggleStacked),
+         },
+         {
+             name: "column-move-left",
+             description: "Move column left",
+-            defaultKeySequence: "Meta+Ctrl+Shift+A",
++            defaultKeySequence: "",
+             action: () => world.doIfTiledFocused(actions.columnMoveLeft),
+         },
+         {
+             name: "column-move-right",
+             description: "Move column right",
+-            defaultKeySequence: "Meta+Ctrl+Shift+D",
++            defaultKeySequence: "",
+             action: () => world.doIfTiledFocused(actions.columnMoveRight),
+         },
+         {
+             name: "column-move-start",
+             description: "Move column to start",
+-            defaultKeySequence: "Meta+Ctrl+Shift+Home",
++            defaultKeySequence: "",
+             action: () => world.doIfTiledFocused(actions.columnMoveStart),
+         },
+         {
+             name: "column-move-end",
+             description: "Move column to end",
+-            defaultKeySequence: "Meta+Ctrl+Shift+End",
++            defaultKeySequence: "",
+             action: () => world.doIfTiledFocused(actions.columnMoveEnd),
+         },
+         {
+@@ -1074,13 +1093,13 @@
+         {
+             name: "column-width-increase",
+             description: "Increase column width",
+-            defaultKeySequence: "Meta+Ctrl++",
++            defaultKeySequence: "",
+             action: () => world.doIfTiledFocused(actions.columnWidthIncrease),
+         },
+         {
+             name: "column-width-decrease",
+             description: "Decrease column width",
+-            defaultKeySequence: "Meta+Ctrl+-",
++            defaultKeySequence: "",
+             action: () => world.doIfTiledFocused(actions.columnWidthDecrease),
+         },
+         {
+@@ -1096,81 +1115,81 @@
+         {
+             name: "cycle-preset-widths",
+             description: "Cycle through preset column widths",
+-            defaultKeySequence: "Meta+R",
++            defaultKeySequence: "",
+             action: () => world.doIfTiledFocused(actions.cyclePresetWidths),
+         },
+         {
+             name: "cycle-preset-widths-reverse",
+             description: "Cycle through preset column widths in reverse",
+-            defaultKeySequence: "Meta+Shift+R",
++            defaultKeySequence: "",
+             action: () => world.doIfTiledFocused(actions.cyclePresetWidthsReverse),
+         },
+         {
+             name: "columns-width-equalize",
+             description: "Equalize widths of visible columns",
+-            defaultKeySequence: "Meta+Ctrl+X",
++            defaultKeySequence: "",
+             action: () => world.do(actions.columnsWidthEqualize),
+         },
+         {
+             name: "columns-squeeze-left",
+             description: "Squeeze left column onto the screen",
+             comment: "Clashes with default KDE shortcuts, may require manual remapping",
+-            defaultKeySequence: "Meta+Ctrl+A",
++            defaultKeySequence: "",
+             action: () => world.doIfTiledFocused(actions.columnsSqueezeLeft),
+         },
+         {
+             name: "columns-squeeze-right",
+             description: "Squeeze right column onto the screen",
+-            defaultKeySequence: "Meta+Ctrl+D",
++            defaultKeySequence: "",
+             action: () => world.doIfTiledFocused(actions.columnsSqueezeRight),
+         },
+         {
+             name: "grid-scroll-focused",
+             description: "Center focused window",
+             comment: "Scrolls so that the focused window is centered in the screen",
+-            defaultKeySequence: "Meta+Alt+Return",
++            defaultKeySequence: "",
+             action: () => world.doIfTiledFocused(actions.gridScrollFocused),
+         },
+         {
+             name: "grid-scroll-left-column",
+             description: "Scroll one column to the left",
+-            defaultKeySequence: "Meta+Alt+A",
++            defaultKeySequence: "",
+             action: () => world.do(actions.gridScrollLeftColumn),
+         },
+         {
+             name: "grid-scroll-right-column",
+             description: "Scroll one column to the right",
+-            defaultKeySequence: "Meta+Alt+D",
++            defaultKeySequence: "",
+             action: () => world.do(actions.gridScrollRightColumn),
+         },
+         {
+             name: "grid-scroll-left",
+             description: "Scroll left",
+-            defaultKeySequence: "Meta+Alt+PgUp",
++            defaultKeySequence: "",
+             action: () => world.do(actions.gridScrollLeft),
+         },
+         {
+             name: "grid-scroll-right",
+             description: "Scroll right",
+-            defaultKeySequence: "Meta+Alt+PgDown",
++            defaultKeySequence: "",
+             action: () => world.do(actions.gridScrollRight),
+         },
+         {
+             name: "grid-scroll-start",
+             description: "Scroll to start",
+-            defaultKeySequence: "Meta+Alt+Home",
++            defaultKeySequence: "",
+             action: () => world.do(actions.gridScrollStart),
+         },
+         {
+             name: "grid-scroll-end",
+             description: "Scroll to end",
+-            defaultKeySequence: "Meta+Alt+End",
++            defaultKeySequence: "",
+             action: () => world.do(actions.gridScrollEnd),
+         },
+         {
+             name: "screen-switch",
+             description: "Move Karousel grid to the current screen",
+-            defaultKeySequence: "Meta+Ctrl+Return",
++            defaultKeySequence: "",
+             action: () => world.do(actions.screenSwitch),
+         },
+         {
+@@ -1246,9 +1265,7 @@
+     const n = numKeyBinding.fKeys ? 12 : 9;
+     for (let i = 0; i < 12; i++) {
+         const numKey = String(i + 1);
+-        const keySequence = i < n ?
+-            numKeyBinding.defaultModifiers + "+" + numPrefix + numKey :
+-            "";
++        const keySequence = "";
+         shortcutActions.push(new ShortcutAction({
+             name: applyMacro(numKeyBinding.name, numKey),
+             description: applyMacro(numKeyBinding.description, numKey),
+@@ -2034,7 +2051,8 @@
+             }
+         }
+         if (!maximized) {
+-            this.client.place(x, y, width, height);
++            const position = karouselPlacement(x, y, width, height, this.column.grid.desktop.clientArea);
++            this.client.place(position.x, position.y, width, height);
+         }
+     }
+     focus() {
+@@ -2694,7 +2712,7 @@
+         if (kwinClient.dock) {
+             constructState = () => new ClientState.Docked(this.world, kwinClient);
+         }
+-        else if (Clients.canTileEver(kwinClient) &&
++        else if (karouselOnPrimary(kwinClient) && Clients.canTileEver(kwinClient) &&
+             this.windowRuleEnforcer.shouldTile(kwinClient) &&
+             (desktop = this.desktopManager.getDesktopForClient(kwinClient)) !== undefined) {
+             Clients.makeTileable(kwinClient);
+@@ -2740,6 +2758,7 @@
+         }
+     }
+     tileClient(client, grid) {
++        if (!karouselOnPrimary(client.kwinClient)) return;
+         if (client.stateManager.getState() instanceof ClientState.Tiled) {
+             return;
+         }
+@@ -2766,6 +2785,7 @@
+         this.floatClient(client);
+     }
+     pinClient(kwinClient) {
++        if (!karouselOnPrimary(kwinClient)) return;
+         const client = this.clientMap.get(kwinClient);
+         if (client === undefined) {
+             return;
+@@ -2794,6 +2814,7 @@
+         }
+     }
+     toggleFloatingClient(kwinClient) {
++        if (!karouselOnPrimary(kwinClient)) return;
+         const client = this.clientMap.get(kwinClient);
+         if (client === undefined) {
+             return;
+@@ -3073,7 +3094,7 @@
+         this.config = config;
+         this.layoutConfig = layoutConfig;
+         this.desktops = new Map();
+-        this.selectedScreen = Workspace.activeScreen;
++        this.selectedScreen = karouselPrimaryOutput();
+         this.kwinActivities = new Set(Workspace.activities);
+         this.kwinDesktops = new Set(Workspace.desktops);
+     }
+@@ -3130,7 +3151,7 @@
+         this.kwinDesktops = newDesktops;
+     }
+     selectScreen(screen) {
+-        this.selectedScreen = screen;
++        this.selectedScreen = karouselPrimaryOutput();
+     }
+     removeActivity(activity) {
+         for (const kwinDesktop of this.kwinDesktops) {
